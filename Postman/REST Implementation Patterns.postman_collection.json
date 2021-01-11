@@ -1,0 +1,174 @@
+{
+	"info": {
+		"_postman_id": "fd6009e9-2467-4cf5-992e-bb6214cd68ad",
+		"name": "REST Implementation Patterns",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get People",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:44317/person",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44317",
+					"path": [
+						"person"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Person 1",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:44317/person/1",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44317",
+					"path": [
+						"person",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Person 2",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:44317/person/2",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44317",
+					"path": [
+						"person",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Person 3",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://localhost:44317/person/3",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44317",
+					"path": [
+						"person",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST Person 3",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "  {\r\n    \"status\": \"Active\",\r\n    \"firstName\": \"Dmitri\",\r\n    \"lastName\": \"Ravinoff\",\r\n    \"emailAddress\": \"raven@rife.com\",\r\n    \"addressLine1\": \"789 Some St.\",\r\n    \"addressLine2\": \"Apt 1011\",\r\n    \"city\": \"Los Angeles\",\r\n    \"state\": \"California\",\r\n    \"zipCode\": \"12345\"\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:44317/person",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44317",
+					"path": [
+						"person"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT Person 3",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "  {\r\n    \"status\": \"Active\",\r\n    \"firstName\": \"Dmitri\",\r\n    \"lastName\": \"Ravinoff\",\r\n    \"emailAddress\": \"raven@rifes.com\",\r\n    \"addressLine1\": \"456 Other St.\",\r\n    \"addressLine2\": \"Apt 123\",\r\n    \"city\": \"Los Angeles\",\r\n    \"state\": \"California\",\r\n    \"zipCode\": \"12345\"\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:44317/person/3",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44317",
+					"path": [
+						"person",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PATCH Person 3",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "  {\r\n    \"status\": \"Retired\",\r\n    \"firstName\": \"Dmitri\",\r\n    \"lastName\": \"Ravinoff\",\r\n    \"emailAddress\": \"raven@rifes.com\",\r\n    \"addressLine1\": \"456 Other St.\",\r\n    \"addressLine2\": \"Apt 123\",\r\n    \"city\": \"Los Angeles\",\r\n    \"state\": \"California\",\r\n    \"zipCode\": \"12345\"\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://localhost:44317/person/3",
+					"protocol": "https",
+					"host": [
+						"localhost"
+					],
+					"port": "44317",
+					"path": [
+						"person",
+						"3"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
