@@ -1,6 +1,7 @@
 using System;
+using System.Collections.Generic;
 
-namespace RestApi
+namespace RestApi.Domain
 {
     public class Person
     {
@@ -16,5 +17,6 @@ namespace RestApi
         public string ZipCode { get; set; }
         public DateTime Created { get; set; }
         public DateTime Updated { get; set; }
+        public List<Order> Orders { get; set; } = new List<Order>();
     }
 }

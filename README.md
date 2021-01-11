@@ -76,20 +76,104 @@ This flexibility is both a strength and a weakness. The ability for the external
 
 ### Organizing by route
 
-You could also choose to map the methods onto controllers strictly by their resources, as determined by their routes, and named directly for the HTTP verb that they handle. This is what ASP.Net really *wants* you to do by convention. You can almost do away with the Route attributes completely if you follow the convention closely enough. Out of the box, a method called "Get" or "GetAsync" on the PersonController class will be automatically wired up to handle GET requests to the "/person" route, and that's the key to organizing by route.
+You could also choose to map the methods onto controllers strictly by their resources, as determined by their routes, and named directly for the HTTP verb that they handle. This is what ASP.Net really *wants* you to do by convention. You can almost do away with the Route attributes completely if you follow the convention closely enough. Out of the box, a method called "Get" or "GetAsync" on the PersonController class will be automatically wired up to handle GET requests to the "/person" route, and that's the key to organizing by route. Here, you can see two controllers, each with a single method called "Get".
+
+```csharp
+    [ApiController]
+    [Route("person")]
+    public class PersonController : ControllerBase
+    {
+        [HttpGet("{id}")]
+        public ActionResult<Person> Get(int id)
+        {
+            return People.FirstOrDefault(x => x.Id == id);
+        }
+    }
+
+    [ApiController]
+    [Route("order")]
+    public class OrderController : ControllerBase
+    {
+        [HttpGet("{id}")]
+        public ActionResult<Order> Get(int id)
+        {
+            return Orders.FirstOrDefault(x => x.Id == id);
+        }
+    }
+```
 
 You can only have a single method with a given signature in any given class. Trying to add a second method with the same name and parameters will result in a compile-time error. The code simply won't build. You can also only have a single method that handles a given route and verb combination or you'll get a run-time error. These two concepts align nicely with each other. The resulting convention forces you to replace small number of very large controllers with a larger number of much smaller controllers, containing only a few methods each, one for each HTTP verb that is supported at that route.
 
 This approach makes the location of the core implementing any given route predictable. Developers will know just where to look to find the implementation of any given route/verb combination. Spreading the code out over more files like this has the beneficial side-effect of reducing merge conflicts with other team members, reducing friction and increasing overall team productivity. Let's look at an example.
 
-If we have a route such as http://yourservice/person/1/orders, we would implement that as a method called simply "Get" (or "GetAsync") on a controller called "PersonOrderController". To come up with this name, we simply concatenate together all of the words in the route that aren't parameters. In this example, that would be "person" and "order" because the "1" is a parameter indicating which person's orders we're supposed to be retrieving. Finally, we tack "Controller" on the end to follow ASP.Net's own controller naming convention, and we're all set.
+If we have a route such as http://yourservice/person/1/order, we would implement that as a method called simply "Get" (or "GetAsync") on a controller called "PersonOrderController". 
 
-The distinction between what is part of the route and what is a parameter is sometimes obvious. Other times, it's more of a judgment call. Let's suppose that we want to implement two new endpoints: http://yourservice/person/1/orders/recent and http://yourservice/person/1/orders/open. First, we need to identify which words identify the resource type, and which are merely parameters. It's obvious that the "1" represents the Id number of the person whose orders we want to retrieve, but what about "recent" and "open"? Are recent orders considered a completely different resource type than open orders? If so, then you could make a strong argument for treating them as part of the route, resulting in a PersonOrderRecentController and a PersonOrderOpenController class, each with a single Get method on them.
+```csharp
+    [ApiController]
+    public class PersonOrderController : ControllerBase
+    {
+        [HttpGet("person/{personId}/order")]
+        public ActionResult<List<Order>> Get(int personId)
+        {
+            return People.FirstOrDefault(x => x.Id == id).Orders.ToList();
+        }
+    }
+```
 
-Is this a good design though? Is it intuitive? Will the developers find things where they expect? In this case, the answer it "probably not". The names are clunky and something just feels "off" about them. When in doubt, ask yourself the following questions. Do these endpoints accept and return different types? Will either of these controllers have any other methods of their own? If so, then they qualify as being distinct new routes/resources.
+To come up with this name, we simply concatenate together all of the words in the route that aren't parameters. In this example, that would be "person" and "order" because the "1" is a parameter indicating which person's orders we're supposed to be retrieving. Finally, we tack "Controller" on the end to follow ASP.Net's own controller naming convention, and we're all set.
 
-In this example, the answer to both question is "no". Neither method takes any kind of parameters that are unique to that endpoint, and both most likely return the same kind of data, perhaps an order summary class. In addition, you would never POST, PUT, or PATCH, or DELETE anything to either of these new routes. Given these answers, it appears that "recent" and "open" do not define a new resource. They are merely parameters to the same GET endpoint (http://yourservice/person/{id}/orders/{type}).
+The distinction between what is part of the route and what is a parameter is sometimes obvious. Other times, it's more of a judgment call. Let's suppose that we want to implement two new endpoints: http://yourservice/person/1/order/recent and http://yourservice/person/1/order/open. First, we need to identify which words identify the resource type, and which are merely parameters. It's obvious that the "1" represents the Id number of the person whose orders we want to retrieve, but what about "recent" and "open"? Are recent orders considered a completely different resource type than open orders? If so, then you could make a strong argument for treating them as part of the route, resulting in a PersonOrderRecentController and a PersonOrderOpenController class, each with a single Get method on them.
+
+```csharp
+    [ApiController]
+    public class PersonOrderRecentController : ControllerBase
+    {
+        [HttpGet("person/{personId}/order/recent")]
+        public ActionResult<List<Order>> Get(int personId)
+        {
+            return People.FirstOrDefault(x => x.Id == id).Orders
+                .OrderByDescending(x => x.OrderDate)
+                .Take(10)
+                .ToList();
+        }
+    }
+
+    [ApiController]
+    public class PersonOrderOpenController : ControllerBase
+    {
+        [HttpGet("person/{personId}/order/open")]
+        public ActionResult<List<Order>> Get(int personId)
+        {
+            return People.FirstOrDefault(x => x.Id == id).Orders
+                .Where(x => x.Status == "open")
+                .ToList();
+        }
+    }
+```
+
+Is this a good design though? Is it intuitive? Will the developers find things where they expect? In this case, the answer it "probably not". The names are clunky and something just feels "off" about them. When in doubt, ask yourself the following questions. Do these endpoints accept and return different types? Will either of these controllers have any other methods of their own? If so, then they qualify as being distinct new routes/resources. In this example though, the answer to both question is "no". Neither method takes any kind of parameters that are unique to that endpoint, and both most likely return the same kind of data, perhaps an order summary class. In addition, you would never POST, PUT, or PATCH, or DELETE anything to either of these new routes. Given these answers, it appears that "recent" and "open" do not define a new resource. They are merely parameters to the same GET endpoint (http://yourservice/person/{personId}/orders/{category}).
+
+```csharp
+        [HttpGet("person/{personId}/order/{category}")]
+        public ActionResult<List<Order>> Get(int personId, string category)
+        {
+            switch (category)
+            {
+                case "open":
+                    return People.FirstOrDefault(x => x.Id == personId).Orders
+                        .Where(x => x.Status == "open")
+                        .ToList();
+                case "recent":
+                    return People.FirstOrDefault(x => x.Id == personId).Orders
+                        .OrderByDescending(x => x.OrderDate)
+                        .Take(10)
+                        .ToList();
+                default:
+                    return null;
+            }
+        }
+```
 
 ## Conclusion
 
-If you want to call your services RESTful, then the HTTP verbs have to be an integral part of the implementation of your routes. It's not enough to simply say that you have REST services simply because you're exposing functionality over HTTP. You need to use the *same* route with different verbs to represent different operations on the same piece of data. If you have routes that end in "GetOrders" or "UpdateOrder", then your services might be REST-ish, but they are not truly RESTful. You can specify your routes by hand, and expose a RESTful API, but still have a disorganized mess in your controllers, but organizing your controllers and methods according to the routes they handle solves so many development problems that I don't know why you would organize your code any other way. It's a convention that encourages you to keep your code organized, and your classes small. It pushes back when you try to do anything else, and helps you to discover the better solution, and those are the best kinds of conventions.
+If you want to call your services RESTful, then the HTTP verbs have to be an integral part of the implementation of your routes. It's not enough to simply say that you have REST services simply because you're exposing functionality over HTTP. You need to use the combination of the same route with different verbs to represent different operations on the same piece of data. If you have routes that end in "GetOrders" or "UpdateOrder", then your services might be REST-ish, but they are not truly RESTful. You can specify your routes by hand, expose a RESTful API, and still have a disorganized mess in your controllers. Organizing your controllers and methods according to the routes they handle solves so many development problems that I don't know why you would organize your code any other way. It's a convention that encourages you to keep your code organized, and your classes small. It pushes back when you try to do anything else, and helps you to discover the better solution, and those are the best kinds of conventions.
